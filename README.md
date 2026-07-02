@@ -152,7 +152,7 @@ uv run streamlit run app.py
 *(Or use `streamlit run app.py` if setting up with Option B)*
 
 ### Dashboard Core Features
-* **Live Configuration**: Tweak database configuration parameters and test your PostgreSQL connection directly from the sidebar.
+* **Live Connection Test**: Click **Test Conn** in the sidebar to verify your connection to the local PostgreSQL database parameters defined in your `.env` configuration.
 * **Database Init**: Click **Init DB** in the sidebar to run the `schema.sql` setup script and create tables and reporting views automatically.
 * **Safe Launch Confirmation**: A details window presents the active search queries and API statuses (Live/Offline Fallback) for confirmation before triggering the workflow.
 * **Live Progress Logging**: Real-time logging outputs show active scraping status, Gemini responses, and rate limit schedules under a unified panel.
