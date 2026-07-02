@@ -10,6 +10,7 @@ The pipeline discovery workflow integrates with a local PostgreSQL database and 
 ```
 fl-it-opportunities-agent/
 ├── app/                      # Core agent logic, classifier, scraper, and DB helpers
+│   ├── app_utils/            # Agent helper and utility services
 │   ├── agent.py              # Main agent workflow graph and nodes
 │   ├── classifier.py         # Gemini IT opportunity classification
 │   ├── database.py           # PostgreSQL CRUD operations
@@ -36,79 +37,165 @@ This project was created to automate the entire process:
 
 ---
 
-## How do I install it?
+## Architecture & Workflow
+
+The pipeline is modeled as an agentic state-machine workflow executing the following loop:
+
+```mermaid
+graph TD
+    %% Styles
+    classDef startEnd fill:#ECEFF1,stroke:#37474F,stroke-width:2px;
+    classDef nodeStyle fill:#E1F5FE,stroke:#0288D1,stroke-width:2px;
+    classDef routeStyle fill:#FFF8E1,stroke:#FBC02D,stroke-width:2px;
+
+    START([START]) --> Search[Lead Discovery Node: search_businesses_node]
+    Search --> Process[Business Processor Node: process_business_node]
+    Process --> Route{Router Node: route_next_business}
+    
+    Route -- "continue" --> Process
+    Route -- "exit" --> END([END])
+
+    class START,END startEnd;
+    class Search,Process nodeStyle;
+    class Route routeStyle;
+```
+
+### Workflow Stages:
+* **Lead Discovery (Search Node)**: Uses the new Google Places API to search for businesses matching defined queries (e.g. `"dentists in Miami, FL"`, `"lawyers in Tampa, FL"`). Includes automated prompt injection detection.
+* **Website Scraper (Process Node)**: Downloads and parses the business homepage content to inspect structure, HTTP status, and text keywords.
+* **Gemini Opportunity Scorer (Process Node)**: Employs Gemini (`gemini-2.5-flash`) with structured Pydantic schema validation to assess the business size (Small, Medium, Large), determine if the site is outdated, identify IT pain points, list pitchable services, and write a custom sales pitch.
+* **PostgreSQL Database Storage**: Saves all structured data in three relational tables, linked through foreign key constraints to maintain strict references.
+
+---
+
+## 🛠️ Technology Stack
+
+* **Orchestration**: Google ADK Workflow (StateGraph-based Graph Orchestration)
+* **Model Integration**: google-genai (Official Gemini API SDK)
+* **Web Scraper**: beautifulsoup4 + httpx
+* **Storage**: psycopg2 + PostgreSQL Local Database
+* **User Interface**: streamlit + pandas
+* **BI Integration**: PostgreSQL Database Views & `v_lead_scoring` (Optimized for Power BI)
+
+---
+
+## ⚙️ Setup & Installation
+
+You can set up and run the application using a standard Python `pip` environment or with the modern `uv` manager.
 
 ### Prerequisites
-Make sure you have the following installed on your system:
-* **Python 3.11+**
-* **uv**: Modern, fast Python package manager. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
-* **PostgreSQL**: Local or remote database server instance running.
+Make sure you have:
+* Python 3.10+
+* PostgreSQL 14+ running locally on your system
 
-### 1. Scaffold & Setup Agent CLI
-Install the agent tool globally using `uv`:
+---
+
+### Option A: Standard Setup (pip)
+
+#### 1. Clone & Set Up Directory
+Open your terminal inside the root folder:
 ```bash
-uv tool install google-agents-cli
+# Create a virtual environment
+python -m venv venv
+
+# Activate on Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Activate on macOS/Linux
+source venv/bin/activate
+
+# Install required dependencies
+pip install -r requirements.txt
 ```
 
-### 2. Clone and Install Dependencies
-Navigate to the project directory and run the install command to configure the virtual environment and fetch packages:
-```bash
-agents-cli install
-```
-
-### 3. Database Setup
-Create a PostgreSQL database named `florida_it_opportunities`. Execute the database schema script to initialize tables and the unified reporting view:
-```bash
-psql -U postgres -d florida_it_opportunities -f schema.sql
-```
-
-### 4. Configuration
-Create a `.env` file at the root of the project (copying from `.env.example`) and fill in your API credentials and database connection details:
+#### 2. Configure Environment Variables
+Copy `.env.example` into a new `.env` file in the root directory:
 ```env
+# GCP APIs
 GEMINI_API_KEY=your_gemini_api_key_here
 GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
 
+# PostgreSQL Database Credentials
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=florida_it_opportunities
 DB_USER=postgres
-DB_PASSWORD=your_postgres_password_here
+DB_PASSWORD=your_password_here
 ```
 
 ---
 
-## How do I use it?
+### Option B: Modern Setup (uv / Agent CLI)
 
-### 1. Launch local development playground
-Run the interactive playground to test query inputs and review agent outputs directly from a browser interface:
+#### 1. Install dependencies using uv
 ```bash
-agents-cli playground
+uv tool install google-agents-cli
+agents-cli install
 ```
 
-### 2. Run unit and integration tests
-To verify project integrity, execute:
+#### 2. Database Init (Manual)
+Run the schema setup script to configure tables and views:
 ```bash
-uv run pytest tests/unit tests/integration
+psql -U postgres -d florida_it_opportunities -f schema.sql
 ```
 
-### 3. Run the Streamlit Web Application
-To run the Streamlit frontend web app in your browser:
-```bash
-uv run streamlit run app.py
-```
+---
 
-### 4. Run FastAPI Backend
-To launch the FastAPI server hosting the agent REST endpoints:
-```bash
-uv run uvicorn app.fast_api_app:app --reload
-```
+## 🚀 Running the Streamlit Dashboard
 
-### 5. Run Evaluation Loops
-To run agent evaluations against test datasets:
+Start the local Streamlit server:
 ```bash
-agents-cli eval generate
-agents-cli eval grade
+streamlit run app.py
 ```
+*(Or use `uv run streamlit run app.py` if setting up with Option B)*
+
+### Dashboard Core Features
+* **Live Configuration**: Tweak database configuration parameters and test your PostgreSQL connection directly from the sidebar.
+* **Database Init**: Click **Init DB** in the sidebar to run the `schema.sql` setup script and create tables and reporting views automatically.
+* **Safe Launch Confirmation**: A details window presents the active search queries and API statuses (Live/Offline Fallback) for confirmation before triggering the workflow.
+* **Live Progress Logging**: Real-time logging outputs show active scraping status, Gemini responses, and rate limit schedules under a unified panel.
+* **Query Isolation View**: The Lead Explorer only loads and displays data matching the current active run queries, preventing mixing historical results (e.g. dentists, warehouses) unless requested.
+* **Dynamic Slicers**: Slicers for Lead Tier, Business Size, and Search Query instantly filter the KPI cards and lead data table.
+* **One-Click CSV Export**: Download the current active dataset as a CSV file to feed reports manually.
+
+---
+
+## 🗄️ PostgreSQL Schema & Views
+
+The database contains three main relational tables:
+1. `businesses`: Holds metadata, contact numbers, and Google Place rankings.
+2. `website_enrichment`: Holds the raw HTML headings, meta description, and page body.
+3. `it_opportunities`: Holds the classification output, including ratings, pain points, and recommended services.
+
+A pre-constructed view `v_lead_scoring` joins these tables automatically, exposing structured arrays and scores directly to BI reporting tools.
+
+---
+
+## 📊 Connecting to Power BI
+
+### Option 1: Direct Database Connection (Recommended)
+1. Open Power BI Desktop.
+2. Click **Get Data** -> **PostgreSQL database**.
+3. Enter the server details:
+   * **Server**: `localhost` (or database host IP)
+   * **Database**: `florida_it_opportunities`
+4. Choose **DirectQuery** or **Import**.
+5. Enter database credentials (configured in `.env`).
+6. Select the view `v_lead_scoring` to load into your report model.
+
+### Option 2: Fallback CSV Import
+1. In the Streamlit UI, click the **📥 Download Lead Table as CSV** button.
+2. Open Power BI Desktop.
+3. Click **Get Data** -> **Text/CSV** and import the downloaded file.
+
+---
+
+## 🔌 Offline Fallback Mode
+
+If no keys are provided in the environment variables, the pipeline runs in a robust Offline Fallback Mode:
+* **Places Search**: Falls back to realistic mock results mapped to specific queries, or generates a dynamic generic mock result for new queries.
+* **Scraper**: Provides predefined mock HTML content for offline domains to simulate scraping.
+* **Classifier**: Uses a rule-based logic processor to categorize businesses, estimate sizes based on review counts, and generate tailored sales reasons.
 
 ---
 
