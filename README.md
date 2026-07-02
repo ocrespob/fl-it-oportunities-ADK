@@ -44,20 +44,20 @@ The pipeline is modeled as an agentic state-machine workflow executing the follo
 ```mermaid
 graph TD
     %% Styles
-    classDef startEnd fill:#ECEFF1,stroke:#37474F,stroke-width:2px;
-    classDef nodeStyle fill:#E1F5FE,stroke:#0288D1,stroke-width:2px;
-    classDef routeStyle fill:#FFF8E1,stroke:#FBC02D,stroke-width:2px;
+    classDef startEnd fill:#ECEFF1,stroke:#37474F,stroke-width:2px
+    classDef nodeStyle fill:#E1F5FE,stroke:#0288D1,stroke-width:2px
+    classDef routeStyle fill:#FFF8E1,stroke:#FBC02D,stroke-width:2px
 
-    START([START]) --> Search[Lead Discovery Node: search_businesses_node]
-    Search --> Process[Business Processor Node: process_business_node]
-    Process --> Route{Router Node: route_next_business}
+    START([START]) --> Search["Lead Discovery Node (search_businesses_node)"]
+    Search --> Process["Business Processor Node (process_business_node)"]
+    Process --> Route{"Router Node (route_next_business)"}
     
     Route -- "continue" --> Process
     Route -- "exit" --> END([END])
 
-    class START,END startEnd;
-    class Search,Process nodeStyle;
-    class Route routeStyle;
+    class START,END startEnd
+    class Search,Process nodeStyle
+    class Route routeStyle
 ```
 
 ### Workflow Stages:
