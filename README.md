@@ -1,92 +1,130 @@
-# fl-it-opportunities-agent
+# fl-it-oportunities-ADK
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `0.6.1`
+## What is this project?
 
-## Project Structure
+🌴 **Florida IT Opportunities Pipeline**  
+An agentic lead qualification pipeline built with Google's Agent Development Kit (ADK) that discovers, scrapes, and classifies IT opportunities for Florida businesses.
+
+The pipeline discovery workflow integrates with a local PostgreSQL database and is optimized to connect directly with Microsoft Power BI for deep business intelligence analysis.
 
 ```
 fl-it-opportunities-agent/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
-│   ├── fast_api_app.py        # FastAPI Backend server
-│   └── app_utils/             # App utilities and helpers
-├── tests/                     # Unit, integration, and load tests
-├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
+├── app/                      # Core agent logic, classifier, scraper, and DB helpers
+│   ├── agent.py              # Main agent workflow graph and nodes
+│   ├── classifier.py         # Gemini IT opportunity classification
+│   ├── database.py           # PostgreSQL CRUD operations
+│   ├── fast_api_app.py       # FastAPI backend server
+│   ├── places_search.py      # Google Places API integration
+│   └── scraper.py            # Website crawler and content extractor
+├── tests/                    # Unit and integration test suites
+├── schema.sql                # PostgreSQL database schema & Power BI reporting view
+├── pyproject.toml            # Project dependencies and configs
+└── AGENTS.md                 # Agent-assisted coding guidelines
 ```
 
-> 💡 **Tip:** Use [Antigravity CLI](https://antigravity.google/) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
+---
 
-## Requirements
+## Why was it created?
 
-Before you begin, ensure you have:
-- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
-- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
+Identifying and qualifying high-potential IT service leads is historically a tedious, manual chore. Sales teams spend hours searching Google, scanning websites, estimating company sizes, diagnosing outdated sites, and determining technical needs. 
 
+This project was created to automate the entire process:
+1. **Automated Search**: Programmatically queries Google Places API to find regional businesses.
+2. **Context Enrichment**: Scrapes each target's website to gather title, meta description, and page body.
+3. **AI-Driven Assessment**: Uses the **Gemini LLM** to estimate business scale, categorize business types, pinpoint IT pain points, recommend pitchable services, and assign a structured `Opportunity Score` (1-10) and `Lead Tier`.
+4. **Interactive Dashboarding**: Stores all insights in a structured PostgreSQL database exposed via a clean SQL view (`v_lead_scoring`) designed to directly power Microsoft Power BI reports.
 
-## Quick Start
+---
 
-Install `agents-cli` and its skills if not already installed:
+## How do I install it?
 
+### Prerequisites
+Make sure you have the following installed on your system:
+* **Python 3.11+**
+* **uv**: Modern, fast Python package manager. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
+* **PostgreSQL**: Local or remote database server instance running.
+
+### 1. Scaffold & Setup Agent CLI
+Install the agent tool globally using `uv`:
 ```bash
-uvx google-agents-cli setup
+uv tool install google-agents-cli
 ```
 
-Install required packages:
-
+### 2. Clone and Install Dependencies
+Navigate to the project directory and run the install command to configure the virtual environment and fetch packages:
 ```bash
 agents-cli install
 ```
 
-Test the agent with a local web server:
+### 3. Database Setup
+Create a PostgreSQL database named `florida_it_opportunities`. Execute the database schema script to initialize tables and the unified reporting view:
+```bash
+psql -U postgres -d florida_it_opportunities -f schema.sql
+```
 
+### 4. Configuration
+Create a `.env` file at the root of the project (copying from `.env.example`) and fill in your API credentials and database connection details:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=florida_it_opportunities
+DB_USER=postgres
+DB_PASSWORD=your_postgres_password_here
+```
+
+---
+
+## How do I use it?
+
+### 1. Launch local development playground
+Run the interactive playground to test query inputs and review agent outputs directly from a browser interface:
 ```bash
 agents-cli playground
 ```
 
-You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
+### 2. Run unit and integration tests
+To verify project integrity, execute:
+```bash
+uv run pytest tests/unit tests/integration
+```
 
-## Commands
+### 3. Run FastAPI Backend
+To launch the FastAPI server hosting the agent REST endpoints:
+```bash
+uv run uvicorn app.fast_api_app:app --reload
+```
 
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `agents-cli install` | Install dependencies using uv                                                         |
-| `agents-cli playground` | Launch local development environment                                                  |
-| `agents-cli lint`    | Run code quality checks                                                               |
-| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
-| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        || [A2A Inspector](https://github.com/a2aproject/a2a-inspector) | Launch A2A Protocol Inspector                                                        |
-
-## 🛠️ Project Management
-
-| Command | What It Does |
-|---------|--------------|
-| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
-| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
-| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
+### 4. Run Evaluation Loops
+To run agent evaluations against test datasets:
+```bash
+agents-cli eval generate
+agents-cli eval grade
+```
 
 ---
 
-## Development
+## Who created it?
 
-Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
+* **Oscar Crespo**
+  * **Email**: [ocrespob@gmail.com](mailto:ocrespob@gmail.com)
+  * **GitHub**: [@ocrespob](https://github.com/ocrespob)
 
-## Deployment
+---
 
-```bash
-gcloud config set project <your-project-id>
-agents-cli deploy
-```
+## How can others contribute?
 
-To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
-To set up your production infrastructure, run `agents-cli infra cicd`.
+Contributions are welcome and highly appreciated! To contribute:
 
-## Observability
-
-Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
-
-## A2A Inspector
-
-This agent supports the [A2A Protocol](https://a2a-protocol.org/). Use the [A2A Inspector](https://github.com/a2aproject/a2a-inspector) to test interoperability.
-See the [A2A Inspector docs](https://github.com/a2aproject/a2a-inspector) for details.
+1. **Fork the Repository** on GitHub.
+2. **Create a Feature Branch** (`git checkout -b feature/amazing-feature`).
+3. **Commit Your Changes** following the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+   * Example: `feat(scraper): add support for parsing javascript-heavy sites`
+   * Use type options such as `feat`, `fix`, `docs`, `refactor`, `chore`, or `test`.
+4. **Run Code Quality Checks**:
+   ```bash
+   agents-cli lint
+   ```
+5. **Open a Pull Request** explaining your enhancements or bug fixes.
