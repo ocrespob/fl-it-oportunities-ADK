@@ -90,7 +90,23 @@ Make sure you have:
 
 ---
 
-### Option A: Standard Setup (pip)
+### Option A: Modern Setup (uv / Agent CLI) - Recommended
+
+#### 1. Install dependencies using uv
+```bash
+uv tool install google-agents-cli
+agents-cli install
+```
+
+#### 2. Database Init (Manual)
+Run the schema setup script to configure tables and views:
+```bash
+psql -U postgres -d florida_it_opportunities -f schema.sql
+```
+
+---
+
+### Option B: Standard Setup (pip)
 
 #### 1. Clone & Set Up Directory
 Open your terminal inside the root folder:
@@ -108,7 +124,9 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 2. Configure Environment Variables
+---
+
+### Common Step: Configure Environment Variables
 Copy `.env.example` into a new `.env` file in the root directory:
 ```env
 # GCP APIs
@@ -121,22 +139,6 @@ DB_PORT=5432
 DB_NAME=florida_it_opportunities
 DB_USER=postgres
 DB_PASSWORD=your_password_here
-```
-
----
-
-### Option B: Modern Setup (uv / Agent CLI)
-
-#### 1. Install dependencies using uv
-```bash
-uv tool install google-agents-cli
-agents-cli install
-```
-
-#### 2. Database Init (Manual)
-Run the schema setup script to configure tables and views:
-```bash
-psql -U postgres -d florida_it_opportunities -f schema.sql
 ```
 
 ---
