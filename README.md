@@ -147,9 +147,9 @@ DB_PASSWORD=your_password_here
 
 Start the local Streamlit server:
 ```bash
-streamlit run app.py
+uv run streamlit run app.py
 ```
-*(Or use `uv run streamlit run app.py` if setting up with Option B)*
+*(Or use `streamlit run app.py` if setting up with Option B)*
 
 ### Dashboard Core Features
 * **Live Configuration**: Tweak database configuration parameters and test your PostgreSQL connection directly from the sidebar.
