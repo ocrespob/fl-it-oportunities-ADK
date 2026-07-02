@@ -91,13 +91,19 @@ To verify project integrity, execute:
 uv run pytest tests/unit tests/integration
 ```
 
-### 3. Run FastAPI Backend
+### 3. Run the Streamlit Web Application
+To run the Streamlit frontend web app in your browser:
+```bash
+uv run streamlit run app.py
+```
+
+### 4. Run FastAPI Backend
 To launch the FastAPI server hosting the agent REST endpoints:
 ```bash
 uv run uvicorn app.fast_api_app:app --reload
 ```
 
-### 4. Run Evaluation Loops
+### 5. Run Evaluation Loops
 To run agent evaluations against test datasets:
 ```bash
 agents-cli eval generate
