@@ -1,0 +1,20 @@
+repos:
+  - repo: local
+    hooks:
+      - id: end-of-file-fixer
+        name: Fix End of Files
+        entry: python -m pre_commit_hooks.end_of_file_fixer
+        language: system
+        types: [text]
+
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+        entry: python -m pre_commit_hooks.trailing_whitespace_fixer
+        language: system
+        types: [text]
+
+      - id: semgrep
+        name: Semgrep Security Scan
+        entry: python scripts/semgrep_wrapper.py --config=semgrep/rules.yaml --error
+        language: system
+        types: [python]

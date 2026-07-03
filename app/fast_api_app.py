@@ -37,12 +37,15 @@ try:
     _, project_id = google.auth.default()
     logging_client = google_cloud_logging.Client()
     logger = logging_client.logger(__name__)
-except Exception as e:
+except Exception:
     import logging as python_logging
+
     python_logging.basicConfig(level=python_logging.INFO)
+
     class MockLogger:
         def log_struct(self, info: dict, severity: str = "INFO"):
             python_logging.info(f"[{severity}] {info}")
+
     logger = MockLogger()
 
 allow_origins = (

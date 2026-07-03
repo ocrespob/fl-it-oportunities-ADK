@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from google.adk.agents.context import Context
@@ -5,6 +6,7 @@ from google.adk.apps import App
 from google.adk.events.event import Event
 from google.adk.events.event_actions import EventActions
 from google.adk.workflow import START, Workflow
+from google.genai import types
 from pydantic import BaseModel, Field
 
 from . import database as db
@@ -12,9 +14,6 @@ from .classifier import classify_lead
 from .places_search import search_places_google
 from .scraper import scrape_website
 
-
-import json
-from google.genai import types
 
 class PipelineInput(BaseModel):
     queries: list[str] = Field(description="Search queries for Google Places API.")
@@ -122,7 +121,11 @@ def search_businesses_node(ctx: Context, node_input: Any) -> Event:
 
     print(f"[Graph Node: Search] Discovered {len(all_discovered)} unique businesses.")
     search_summary = f"Discovered {len(all_discovered)} businesses matching queries."
-    yield Event(content=types.Content(role='model', parts=[types.Part.from_text(text=search_summary)]))
+    yield Event(
+        content=types.Content(
+            role="model", parts=[types.Part.from_text(text=search_summary)]
+        )
+    )
     yield Event(
         output={"businesses_count": len(all_discovered)},
         actions=EventActions(
@@ -216,9 +219,15 @@ def process_business_node(ctx: Context, node_input: Any) -> Event:
         f"Lead Tier: {full_result['lead_tier']} (Score: {full_result['opportunity_score']}/10)"
     )
     if full_result.get("security_risk_detected"):
-        summary_text += f"\n⚠️ Security Risk Warning: {full_result['security_risk_summary']}"
+        summary_text += (
+            f"\n⚠️ Security Risk Warning: {full_result['security_risk_summary']}"
+        )
 
-    yield Event(content=types.Content(role='model', parts=[types.Part.from_text(text=summary_text)]))
+    yield Event(
+        content=types.Content(
+            role="model", parts=[types.Part.from_text(text=summary_text)]
+        )
+    )
     yield Event(
         output=full_result,
         actions=EventActions(

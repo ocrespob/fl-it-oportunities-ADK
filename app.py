@@ -226,9 +226,20 @@ try:
             df_leads = df_leads[
                 df_leads["search_query"].isin(st.session_state.current_queries)
             ]
-        
+
         if not df_leads.empty:
-            string_cols = ["category", "online_presence", "scraped_title", "meta_description", "scraped_text", "sales_reasoning", "business_size_reasoning", "phone", "address", "website_url"]
+            string_cols = [
+                "category",
+                "online_presence",
+                "scraped_title",
+                "meta_description",
+                "scraped_text",
+                "sales_reasoning",
+                "business_size_reasoning",
+                "phone",
+                "address",
+                "website_url",
+            ]
             for col in string_cols:
                 if col in df_leads.columns:
                     df_leads[col] = df_leads[col].fillna("N/A")
@@ -504,8 +515,10 @@ if not df_leads.empty:
         with detail_col1:
             st.markdown(f"### 🏢 {biz_detail['name']}")
             if biz_detail.get("security_risk_detected"):
-                st.error(f"🚨 **Security Warning:** {biz_detail.get('security_risk_summary', 'Suspicious content or prompt injection detected and neutralized.')}")
-            
+                st.error(
+                    f"🚨 **Security Warning:** {biz_detail.get('security_risk_summary', 'Suspicious content or prompt injection detected and neutralized.')}"
+                )
+
             st.write(f"🏷️ **Category:** {biz_detail.get('category', 'N/A')}")
             st.write(f"📞 **Phone:** {biz_detail.get('phone', 'N/A')}")
             st.write(f"📍 **Address:** {biz_detail.get('address', 'N/A')}")

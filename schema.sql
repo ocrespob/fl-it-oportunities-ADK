@@ -54,7 +54,7 @@ CREATE INDEX IF NOT EXISTS idx_it_opportunities_size ON it_opportunities(busines
 
 -- 4. Unified view for Power BI lead scoring dashboard
 CREATE OR REPLACE VIEW v_lead_scoring AS
-SELECT 
+SELECT
     b.id,
     b.place_id,
     b.name,

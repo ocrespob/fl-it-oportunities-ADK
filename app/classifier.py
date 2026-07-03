@@ -85,15 +85,27 @@ def classify_with_mock(
     for kw in injection_keywords:
         if kw in scraped_lower:
             security_risk_detected = True
-            security_risk_summary = f"Detected potential prompt injection attempt with keyword: '{kw}'."
+            security_risk_summary = (
+                f"Detected potential prompt injection attempt with keyword: '{kw}'."
+            )
             break
 
     # 2. Determine category
     if "dentist" in name_lower or "dental" in name_lower:
         category = "Dental"
-    elif "law" in name_lower or "injury" in name_lower or "defense" in name_lower or "attorney" in name_lower:
+    elif (
+        "law" in name_lower
+        or "injury" in name_lower
+        or "defense" in name_lower
+        or "attorney" in name_lower
+    ):
         category = "Legal"
-    elif "clinic" in name_lower or "medical" in name_lower or "health" in name_lower or "doctor" in name_lower:
+    elif (
+        "clinic" in name_lower
+        or "medical" in name_lower
+        or "health" in name_lower
+        or "doctor" in name_lower
+    ):
         category = "Medical"
     else:
         category = "Professional Services"
@@ -168,7 +180,9 @@ def classify_with_mock(
         or "affordable criminal defense" in scraped_lower
     ):
         status = "Outdated"
-        online_presence = "Aging static website, built in 2017 with basic contact information."
+        online_presence = (
+            "Aging static website, built in 2017 with basic contact information."
+        )
         pain_points = [
             "Website design is legacy (copyright 2017)",
             "Slow loading",
@@ -180,7 +194,9 @@ def classify_with_mock(
         reasoning = "The website is functional but has aging layouts and no active lead capture forms. Pitching a modern redesign and SEO services is a strong medium opportunity."
     elif "state-of-the-art" in scraped_lower or "patient portal" in scraped_lower:
         status = "Modern"
-        online_presence = "Modern and secure responsive website with active patient/client portal."
+        online_presence = (
+            "Modern and secure responsive website with active patient/client portal."
+        )
         pain_points = ["None identified; website is already modern and secure"]
         services = [
             "Advanced Cyber Security Audit",
