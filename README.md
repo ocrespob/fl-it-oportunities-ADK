@@ -2,7 +2,7 @@
 
 ## What is this project?
 
-🌴 **Florida IT Opportunities Pipeline**  
+🌴 **Florida IT Opportunities Pipeline**
 An agentic lead qualification pipeline built with Google's Agent Development Kit (ADK) that discovers, scrapes, and classifies IT opportunities for Florida businesses.
 
 The pipeline discovery workflow integrates with a local PostgreSQL database and is optimized to connect directly with Microsoft Power BI for deep business intelligence analysis.
@@ -27,7 +27,7 @@ fl-it-opportunities-agent/
 
 ## Why was it created?
 
-Identifying and qualifying high-potential IT service leads is historically a tedious, manual chore. Sales teams spend hours searching Google, scanning websites, estimating company sizes, diagnosing outdated sites, and determining technical needs. 
+Identifying and qualifying high-potential IT service leads is historically a tedious, manual chore. Sales teams spend hours searching Google, scanning websites, estimating company sizes, diagnosing outdated sites, and determining technical needs.
 
 This project was created to automate the entire process:
 1. **Automated Search**: Programmatically queries Google Places API to find regional businesses.
@@ -51,7 +51,7 @@ graph TD
     START([START]) --> Search["Lead Discovery Node (search_businesses_node)"]
     Search --> Process["Business Processor Node (process_business_node)"]
     Process --> Route{"Router Node (route_next_business)"}
-    
+
     Route -- "continue" --> Process
     Route -- "exit" --> END([END])
 
@@ -121,7 +121,7 @@ python -m venv venv
 source venv/bin/activate
 
 # Install required dependencies
-pip install -r requirements.txt
+pip install .
 ```
 
 ---
