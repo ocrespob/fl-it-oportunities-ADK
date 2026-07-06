@@ -12,6 +12,20 @@
 
 ---
 
+## 📝 Project Description
+The **Florida IT Opportunities Pipeline** is an agentic automation system that programmatically discovers, scrapes, qualifies, and scores local business leads for B2B IT service providers.
+
+At its core, the project builds a bridge between unstructured regional business web spaces and structured relational intelligence. The system operates as a state-machine workflow executing a multi-step agentic graph:
+1. **Targeted Search**: The pipeline uses the **Google Places API** to find regional businesses matching queries (e.g., *dentists, lawyers, medical clinics*) across Florida.
+2. **Deep Content Enrichment**: A customized scraper crawls each business's homepage, parsing structural markup, HTTP headers, titles, and body content.
+3. **Structured Gemini Scoring**: Using **Gemini 2.5 Flash** with Pydantic JSON validation, the agent analyzes the scraped site to estimate business scale, categorize the industry, diagnose IT pain points (e.g., outdated design, insecure HTTP links, missing booking systems), recommend tailored services, and assign an objective 1–10 opportunity score.
+4. **Relational Database Logging**: Enriched details are written to a **PostgreSQL** schema configured with a direct database view (`v_lead_scoring`) designed for instant **Microsoft Power BI** integration.
+5. **Streamlit Control Center**: An interactive dashboard provides one-click database initializers, connection verifiers, query parameters configuration, real-time logging views, lead filtering slicers, and CSV exports.
+
+By combining Google's Agent Development Kit (ADK) with Gemini's reasoning capabilities, this project replaces hours of manual web scouting with a secure, rate-limit-aware, and prompt-injection-resistant lead generation engine.
+
+---
+
 ## 📖 1. Executive Summary
 Identifying and qualifying high-potential B2B leads is historically a highly manual, expensive, and error-prone process. Sales development teams spend hours searching Google, reviewing company websites, diagnosing technical vulnerabilities, and tailoring cold-outreach pitches.
 
