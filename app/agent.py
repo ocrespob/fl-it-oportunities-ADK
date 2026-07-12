@@ -166,8 +166,9 @@ def process_business_node(ctx: Context, node_input: Any) -> Event:
 
     # 2. Run Gemini (or Mock) IT Classification & Business Size Estimation
     scraped_text = scrape_data.get("scraped_text", "")
+    http_status = scrape_data.get("http_status", 200)
     classification = classify_lead(
-        business_name, website_url, review_count, scraped_text
+        business_name, website_url, review_count, scraped_text, http_status
     )
 
     # Create unified result dictionary

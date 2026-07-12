@@ -65,7 +65,11 @@ class ITOpportunityClassification(BaseModel):
 
 
 def classify_with_mock(
-    business_name: str, website_url: str, review_count: int, scraped_text: str
+    business_name: str,
+    website_url: str,
+    review_count: int,
+    scraped_text: str,
+    http_status: int = 200,
 ) -> dict:
     """Provides a rule-based mock classification for demonstration when Gemini is unavailable."""
     name_lower = business_name.lower()
@@ -132,13 +136,9 @@ def classify_with_mock(
         size_reasoning = "Estimated Small because they represent a single-office local business with moderate/low review counts."
 
     # 4. Determine website status & opportunities & online presence
-    if (
-        not website_url
-        or "failed to load" in scraped_lower
-        or "no website" in scraped_lower
-    ):
+    if not website_url:
         status = "Broken/Missing"
-        online_presence = "No active website or online presence found."
+        online_presence = "No website URL provided."
         pain_points = [
             "No active web presence",
             "Cannot be found online via direct URL",
@@ -152,6 +152,39 @@ def classify_with_mock(
         score = 9
         tier = "High"
         reasoning = f"{business_name} has no website. Setting up a basic web presence is a high-priority opportunity for web design and local SEO."
+    elif http_status in (401, 403) or "http status: 403" in scraped_lower or "http status: 401" in scraped_lower:
+        status = "Modern"
+        online_presence = "Website is active but protected by access controls/firewall (HTTP 403/401)."
+        pain_points = [
+            "Potential WAF/firewall misconfiguration blocking legitimate crawlers",
+            "Need for security compliance review",
+        ]
+        services = [
+            "Cybersecurity Audit",
+            "WAF and Firewall Configuration Review",
+            "Managed IT Services",
+        ]
+        score = 5
+        tier = "Medium"
+        reasoning = f"{business_name}'s website is active but returns HTTP {http_status} (Forbidden/Unauthorized). They might benefit from a firewall/WAF configuration review or a security audit."
+    elif (
+        "failed to load" in scraped_lower
+        or "no website" in scraped_lower
+        or http_status in (404, 500, 502, 503, 504)
+    ):
+        status = "Broken/Missing"
+        online_presence = f"Website is inaccessible (HTTP Status: {http_status})."
+        pain_points = [
+            "Website is inaccessible/broken",
+            "Loss of online presence and customer leads",
+        ]
+        services = [
+            "Website Recovery and Redesign",
+            "Website Hosting and Maintenance",
+        ]
+        score = 8
+        tier = "High"
+        reasoning = f"{business_name}'s website is completely broken or inaccessible, representing an immediate need for website recovery and hosting services."
     elif (
         "2013" in scraped_lower
         or "internet explorer" in scraped_lower
@@ -237,7 +270,11 @@ def classify_with_mock(
 
 
 def classify_lead(
-    business_name: str, website_url: str, review_count: int, scraped_text: str
+    business_name: str,
+    website_url: str,
+    review_count: int,
+    scraped_text: str,
+    http_status: int = 200,
 ) -> dict:
     """
     Invokes Google Gemini (gemini-2.5-flash) to perform IT classification and business sizing.
@@ -249,7 +286,7 @@ def classify_lead(
             f"[Gemini Classifier] No API Key. Running rule-based mock classification for '{business_name}'."
         )
         return classify_with_mock(
-            business_name, website_url, review_count, scraped_text
+            business_name, website_url, review_count, scraped_text, http_status
         )
 
     try:
@@ -265,6 +302,7 @@ def classify_lead(
         - Name: {business_name}
         - Website URL: {website_url if website_url else "None"}
         - Google Reviews Count: {review_count}
+        - HTTP Status when loading website: {http_status}
 
         Scraped Website Content:
         \"\"\"{scraped_text}\"\"\"
@@ -293,6 +331,8 @@ def classify_lead(
            - Medium: regional, multiple locations, mid-size clinic/firm, high review counts.
            - Large: multi-state/enterprise, 500+ reviews, large medical/legal groups.
         2. Website Status (Modern, Outdated, Broken/Missing).
+           - NOTE: If the HTTP Status is 403 (Forbidden) or 401 (Unauthorized), it means the website is online and active but blocking our scraper (e.g. via Cloudflare or a Web Application Firewall). The website is NOT broken/missing. You should classify the website status as 'Modern' or 'Outdated' based on the business details, rather than 'Broken/Missing'. The sales reasoning must NOT claim that the website is broken. Instead, focus the pitch on cybersecurity audits, WAF/firewall configuration reviews, or SEO/IT services.
+           - NOTE: Only classify as 'Broken/Missing' if the URL is missing or returns a 404, 5xx server error, or connection error.
         3. IT Pain Points: identify technical deficiencies (e.g. HTTP instead of HTTPS, slow loading, missing booking/intake forms, bad mobile experience).
         4. Pitchable Services: what tech solutions we could sell them.
         5. Opportunity Score (1-10) and Lead Tier (High, Medium, Low).
@@ -326,5 +366,5 @@ def classify_lead(
             f"[Gemini Classifier] Error calling Gemini API: {e}. Falling back to rule-based classification."
         )
         return classify_with_mock(
-            business_name, website_url, review_count, scraped_text
+            business_name, website_url, review_count, scraped_text, http_status
         )

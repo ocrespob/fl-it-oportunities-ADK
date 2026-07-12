@@ -34,6 +34,8 @@ setup_telemetry()
 
 # Setup Logging (with local fallback if GCP project is not configured)
 try:
+    if os.environ.get("INTEGRATION_TEST") == "TRUE":
+        raise ValueError("Skip Google Auth in integration tests")
     _, project_id = google.auth.default()
     logging_client = google_cloud_logging.Client()
     logger = logging_client.logger(__name__)

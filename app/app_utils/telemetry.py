@@ -26,6 +26,10 @@ def setup_telemetry() -> str | None:
     # Keep full prompts/responses out of trace span attributes (use GenAI logging instead).
     os.environ.setdefault("ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS", "false")
 
+    if os.environ.get("INTEGRATION_TEST") == "TRUE":
+        logging.info("Skipping OpenTelemetry GCP exporters in integration test environment.")
+        return None
+
     bucket = os.environ.get("LOGS_BUCKET_NAME")
     capture_content = os.environ.get(
         "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "false"

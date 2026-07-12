@@ -204,3 +204,9 @@ tools/a2a-inspector/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+
+# Temporary validation scripts
+/run_in_thread.py
+/test_agent_card_builder.py
+/test_fastapi_lifespan.py
+/test_server_startup.py
